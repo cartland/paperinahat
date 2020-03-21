@@ -160,7 +160,6 @@
 
       <button id="take-paper-button">Take Paper</button>
 
-      <!-- TODO put all papers back. -->
       <p />
       <p id="paper-in-hand">No papers in hand</p>
       <button id="return-paper-button">Put All Cards Back</button>
@@ -189,7 +188,7 @@
       // Button for inserting new papers.
       document.getElementById("word-input-button").addEventListener("click", function () {
         const newPaperText = document.getElementById("word-input-text").value.toUpperCase();
-        insertNewPaper(newPaperText);
+        putPapersInHat([newPaperText]);
       });
       // Enter button does the same thing as clicking the Insert button.
       document.getElementById("word-input-text").addEventListener("keyup", function (event) {
@@ -198,18 +197,19 @@
           document.getElementById("word-input-button").click();
         }
       });
-      function insertNewPaper(newPaperText) {
+
+      function putPapersInHat(newPapers) {
         const roomId = state.roomId;
         firebase.firestore().runTransaction(transaction => {
           const docRef = db.collection('rooms').doc(roomId);
           return transaction.get(docRef).then(snapshot => {
             const PAPERS_KEY = 'papers';
-            var papers = snapshot.get(PAPERS_KEY);
-            if (!papers) {
-              papers = [];
+            var oldPapers = snapshot.get(PAPERS_KEY);
+            if (!oldPapers) {
+              oldPapers = [];
             }
-            papers.push(newPaperText);
-            transaction.update(docRef, PAPERS_KEY, papers);
+            const updatedPapers = oldPapers.concat(newPapers);
+            transaction.update(docRef, PAPERS_KEY, updatedPapers);
           });
         });
         // Clear text field after submission.
@@ -222,6 +222,7 @@
       });
       function takePaper() {
         const roomId = state.roomId;
+        var removedPaper = null;
         firebase.firestore().runTransaction(transaction => {
           const docRef = db.collection('rooms').doc(roomId);
           return transaction.get(docRef).then(snapshot => {
@@ -231,10 +232,13 @@
               papers = [];
             }
             shuffle(papers);
-            const removedPaper = papers.pop();
+            removedPaper = papers.pop();
             transaction.update(docRef, PAPERS_KEY, papers);
-            putPaperInHand(removedPaper);
           });
+        }).then(function () {
+          putPaperInHand(removedPaper);
+        }).catch(function (err) {
+          console.error('Error taking a paper', err);
         });
       }
 
@@ -244,6 +248,20 @@
           return;
         }
         state.papersInHand.push(removedPaper);
+        updateHandUI();
+      }
+
+      // Button for discarding papers.
+      document.getElementById("discard-paper-button").addEventListener("click", function () {
+        discardAllCardsInHand();
+      });
+
+      function discardAllCardsInHand() {
+        state.papersInHand = [];
+        updateHandUI();
+      }
+
+      function updateHandUI() {
         document.getElementById("paper-in-hand").innerHTML = state.papersInHand;
       }
 
@@ -253,6 +271,21 @@
           [a[i], a[j]] = [a[j], a[i]];
         }
         return a;
+      }
+
+      // Button  to return all cards.
+      document.getElementById("return-paper-button").addEventListener("click", function () {
+        putBackAllCardsInHand();
+      });
+
+      function putBackAllCardsInHand() {
+        const papersInHand = state.papersInHand;
+        if (!papersInHand) {
+          console.error('No papers in hand!');
+          return;
+        }
+        putPapersInHat(papersInHand);
+        discardAllCardsInHand();
       }
 
       function displayRoom(roomId) {
