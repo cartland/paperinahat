@@ -153,14 +153,17 @@
       <button id="word-input-button">Insert</button>
 
       <!-- Count of papers. -->
-      <p id="count-in-hat" style="display: none;">Paper count:
-        <div id="paper-count" style="display: inline;"></div>
+      <p />
+      <p id="count-in-hat" style="display: inline;">&nbsp;<br />
+        <div id="paper-count" style="display: inline;">&nbsp;</div>
       </p>
 
       <!-- TODO draw paper. -->
       <button id="draw-paper-button">Draw Paper</button>
+
+      <!-- TODO put back paper. -->
+      <p />
       <p id="paper-in-hand">TODO: Paper in hand</p>
-      <!-- TODO pub back paper. -->
       <button id="draw-paper-button">Put Back</button>
       <button id="discard-paper-button">Discard</button>
     </div>
@@ -266,7 +269,7 @@
       }
 
       function updatePaperCount(paperCount) {
-        document.getElementById('count-in-hat').style.display = 'inline';
+        document.getElementById('count-in-hat').innerHTML = 'Paper count: <br />';
         document.getElementById('paper-count').innerHTML = paperCount;
       }
 
