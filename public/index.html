@@ -107,15 +107,11 @@
       border-radius: 4px;
     }
 
-    #room-header {
+    .system-label {
       font-style: italic;
     }
 
-    #room-id {
-      font-weight: bold;
-    }
-
-    #paper-count {
+    .user-data {
       font-weight: bold;
     }
 
@@ -149,7 +145,7 @@
     <!-- TODO exit room and go to lobby. -->
     <div id="room-content" style="display: none;">
       <p id="room-header" style="display: inline;">Room ID:
-        <div id="room-id" style="display: inline;"></div>
+        <div id="room-id" class="user-data" style="display: inline;"></div>
       </p>
 
       <!-- Insert new paper. -->
@@ -159,7 +155,7 @@
       <!-- Count of papers. -->
       <p />
       <p id="count-in-hat" style="display: inline;">&nbsp;<br />
-        <div id="paper-count" style="display: inline;">&nbsp;</div>
+        <div id="paper-count" class="user-data" style="display: inline;">&nbsp;</div>
       </p>
 
       <button id="take-paper-button">Take Paper</button>
@@ -181,16 +177,12 @@
     document.addEventListener('DOMContentLoaded', function () {
       // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
       // // The Firebase SDK is initialized and available here!
-      //
-      // firebase.auth().onAuthStateChanged(user => { });
-      // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-      // firebase.messaging().requestPermission().then(() => { });
-      // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-      //
       // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
       const db = firebase.firestore();
+
+      // Local state. This data is lost if the user refreshes the page.
       var state = {
-        roomId: null,
+        roomId: null, // Retrieved from URL parameter.
         papersInHand: []
       };
 
@@ -390,6 +382,7 @@
         document.getElementById('lobby-content').style.display = 'none';
       }
 
+      // Get room from URL parameter and initalize room.
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       const roomId = urlParams.get('r');
@@ -401,9 +394,25 @@
         displayLobby();
       }
 
+      // Warn users before losing data.
+      // Custom messages are not supported in many browsers.
+      // https://stackoverflow.com/a/7317311
+      window.addEventListener("beforeunload", function (e) {
+        const papersInHand = state.papersInHand;
+        if (papersInHand && papersInHand.length) {
+          var confirmationMessage = 'You have ' + papersInHand.length + ' papers in your hand.'
+            + 'If you leave, the papers will be lost.';
+          (e || window.event).returnValue = confirmationMessage; // Gecko + IE
+          return confirmationMessage; // Gecko + Webkit, Safari, Chrome etc.
+        } else {
+          return undefined;
+        }
+      });
+
+      // Firebase debugging information.
       try {
         let app = firebase.app();
-        let features = ['auth', 'database', 'firestore', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
+        let features = ['firestore'].filter(feature => typeof app[feature] === 'function');
         document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
       } catch (e) {
         console.error(e);
