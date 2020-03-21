@@ -115,6 +115,10 @@
       font-weight: bold;
     }
 
+    #paper-count {
+      font-weight: bold;
+    }
+
     @media (max-width: 600px) {
 
       body,
@@ -162,9 +166,12 @@
 
       <div id="hand-content" style="display: none;">
         <p />
-        <p id="paper-in-hand">No papers in hand</p>
-        <button id="return-paper-button">Put All Cards Back</button>
-        <button id="discard-paper-button">Discard Cards in Hand</button>
+        <p>Papers in hand</p>
+        <b>
+          <p id="paper-in-hand">No papers in hand</p>
+        </b>
+        <button id="return-paper-button">Put All Papers Back</button>
+        <button id="discard-paper-button">Discard Papers in Hand</button>
       </div>
     </div>
 
@@ -269,10 +276,10 @@
 
       // Button for discarding papers.
       document.getElementById("discard-paper-button").addEventListener("click", function () {
-        removeAllCardsInHand();
+        removeAllPapersInHand();
       });
 
-      function removeAllCardsInHand() {
+      function removeAllPapersInHand() {
         const removedPapers = state.papersInHand;
         state.papersInHand = [];
         updateHandUI();
@@ -298,19 +305,19 @@
         return a;
       }
 
-      // Button  to return all cards.
+      // Button to return all papers.
       document.getElementById("return-paper-button").addEventListener("click", function () {
-        putBackAllCardsInHand();
+        putBackAllPapersInHand();
       });
 
-      function putBackAllCardsInHand() {
+      function putBackAllPapersInHand() {
         const papersInHand = state.papersInHand;
         if (!papersInHand) {
           console.error('No papers in hand!');
           return;
         }
         putPapersInHat(papersInHand);
-        removeAllCardsInHand();
+        removeAllPapersInHand();
       }
 
       function displayRoom(roomId) {
@@ -366,7 +373,7 @@
       }
 
       function updatePaperCount(paperCount) {
-        document.getElementById('count-in-hat').innerHTML = 'Paper count: <br />';
+        document.getElementById('count-in-hat').innerHTML = 'Paper count<br />';
         document.getElementById('paper-count').innerHTML = paperCount;
       }
 
