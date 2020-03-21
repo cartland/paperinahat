@@ -158,14 +158,13 @@
         <div id="paper-count" style="display: inline;">&nbsp;</div>
       </p>
 
-      <!-- TODO draw paper. -->
-      <button id="draw-paper-button">Draw Paper</button>
+      <button id="take-paper-button">Take Paper</button>
 
-      <!-- TODO put back paper. -->
+      <!-- TODO put all papers back. -->
       <p />
-      <p id="paper-in-hand">TODO: Paper in hand</p>
-      <button id="draw-paper-button">Put Back</button>
-      <button id="discard-paper-button">Discard</button>
+      <p id="paper-in-hand">No papers in hand</p>
+      <button id="return-paper-button">Put All Cards Back</button>
+      <button id="discard-paper-button">Discard Cards in Hand</button>
     </div>
 
   </div>
@@ -183,7 +182,8 @@
       // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
       const db = firebase.firestore();
       var state = {
-        roomId: null
+        roomId: null,
+        papersInHand: []
       };
 
       // Button for inserting new papers.
@@ -214,6 +214,45 @@
         });
         // Clear text field after submission.
         document.getElementById("word-input-text").value = "";
+      }
+
+      // Button for taking a paper.
+      document.getElementById("take-paper-button").addEventListener("click", function () {
+        takePaper();
+      });
+      function takePaper() {
+        const roomId = state.roomId;
+        firebase.firestore().runTransaction(transaction => {
+          const docRef = db.collection('rooms').doc(roomId);
+          return transaction.get(docRef).then(snapshot => {
+            const PAPERS_KEY = 'papers';
+            var papers = snapshot.get(PAPERS_KEY);
+            if (!papers) {
+              papers = [];
+            }
+            shuffle(papers);
+            const removedPaper = papers.pop();
+            transaction.update(docRef, PAPERS_KEY, papers);
+            putPaperInHand(removedPaper);
+          });
+        });
+      }
+
+      function putPaperInHand(removedPaper) {
+        if (!removedPaper) {
+          console.error('No paper to remove!');
+          return;
+        }
+        state.papersInHand.push(removedPaper);
+        document.getElementById("paper-in-hand").innerHTML = state.papersInHand;
+      }
+
+      function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
       }
 
       function displayRoom(roomId) {
