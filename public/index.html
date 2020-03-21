@@ -221,6 +221,7 @@
           });
         }).then(function () {
           console.log('Put', filteredNewPapers.length, 'paper(s) in hat');
+          console.log('New papers in hat:', filteredNewPapers);
         }).catch(function (err) {
           console.error('Error inserting a paper', err);
         });
@@ -235,46 +236,48 @@
 
       function takePaper() {
         const roomId = state.roomId;
-        var removedPaper = null;
         firebase.firestore().runTransaction(transaction => {
           const docRef = db.collection('rooms').doc(roomId);
           return transaction.get(docRef).then(snapshot => {
             const PAPERS_KEY = 'papers';
             var papers = snapshot.get(PAPERS_KEY);
-            if (!papers) {
-              papers = [];
+            if (!papers || papers.length == 0) {
+              return Promise.reject("No papers available!");
             }
             shuffle(papers);
             removedPaper = papers.pop();
             transaction.update(docRef, PAPERS_KEY, papers);
+            return removedPaper;
           });
-        }).then(function () {
+        }).then(function (removedPaper) {
+          console.log('Took paper', removedPaper, 'from hat');
           putPaperInHand(removedPaper);
-          console.log('Took paper', removedPaper, 'from hat and put in hand');
         }).catch(function (err) {
-          console.error('Error taking a paper', err);
+          console.error('Error taking a paper.', err);
         });
       }
 
-      function putPaperInHand(removedPaper) {
-        if (!removedPaper) {
-          console.error('No paper to remove!');
+      function putPaperInHand(paperForHand) {
+        if (!paperForHand) {
+          console.error('Cannot put paper in hand!', paperForHand);
           return;
         }
-        state.papersInHand.push(removedPaper);
+        state.papersInHand.push(paperForHand);
+        console.log('Put paper', paperForHand, 'in hand');
         updateHandUI();
       }
 
       // Button for discarding papers.
       document.getElementById("discard-paper-button").addEventListener("click", function () {
-        discardAllCardsInHand();
+        removeAllCardsInHand();
       });
 
-      function discardAllCardsInHand() {
-        const discardCount = state.papersInHand.length;
+      function removeAllCardsInHand() {
+        const removedPapers = state.papersInHand;
         state.papersInHand = [];
         updateHandUI();
-        console.log('Discarded', discardCount, 'paper(s)');
+        console.log('Removed', removedPapers.length, 'paper(s) from hand');
+        console.log('Removed papers:', removedPapers);
       }
 
       function updateHandUI() {
@@ -307,7 +310,7 @@
           return;
         }
         putPapersInHat(papersInHand);
-        discardAllCardsInHand();
+        removeAllCardsInHand();
       }
 
       function displayRoom(roomId) {
