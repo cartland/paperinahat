@@ -24,6 +24,7 @@
       margin: 0;
       padding: 0;
       text-align: center;
+      text-transform: uppercase;
     }
 
     #message {
@@ -76,6 +77,10 @@
       font-size: 13px;
     }
 
+    p {
+      text-transform: uppercase;
+    }
+
     input {
       display: block;
       text-align: center;
@@ -100,6 +105,14 @@
       border-radius: 4px;
     }
 
+    #room-header {
+      font-style: italic;
+    }
+
+    #room-id {
+      font-weight: bold;
+    }
+
     @media (max-width: 600px) {
 
       body,
@@ -120,14 +133,16 @@
   <div id="message">
     <h2>Papers in a Hat</h2>
 
-    <div id="pick-a-room">
+    <div id="lobby-content" style="display: none;">
       <input id="room-id-input-text" type="text" placeholder="ROOM ID">
       <button id="join-room-button">Join</button>
       <button id="create-room-button">Create a Room</button>
     </div>
 
-    <div id="room-content">
-      <p id="room-id">TODO: Room ID</p>
+    <div id="room-content" style="display: none;">
+      <p id="room-header" style="display: inline;">Room ID:
+        <div id="room-id" style="display: inline;"></div>
+      </p>
       <input id="word-input-text" type="text" placeholder="WRITE SOMETHING HERE">
       <button id="word-input-button">Insert</button>
       <p id="count-in-hat">TODO: Count</p>
@@ -150,6 +165,34 @@
       // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
       //
       // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+      function displayRoom(roomId) {
+        document.getElementById('room-content').style.display = 'block';
+        document.getElementById('room-id').innerHTML = roomId;
+      }
+
+      function hideRoom() {
+        document.getElementById('room-content').style.display = 'none';
+      }
+
+      function displayLobby() {
+        document.getElementById('lobby-content').style.display = 'block';
+        document.getElementById('room-id').innerHTML = "Join or create a room";
+      }
+
+      function hideLobby() {
+        document.getElementById('lobby-content').style.display = 'none';
+      }
+
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const roomId = urlParams.get('r');
+      if (roomId) {
+        hideLobby();
+        displayRoom(roomId);
+      } else {
+        hideRoom();
+        displayLobby();
+      }
 
       try {
         let app = firebase.app();
