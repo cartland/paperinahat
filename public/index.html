@@ -284,7 +284,7 @@
         const papersInHand = state.papersInHand;
         if (papersInHand && papersInHand.length) {
           document.getElementById("hand-content").style.display = 'block';
-          document.getElementById("paper-in-hand").innerHTML = papersInHand.join('<br />');
+          document.getElementById("paper-in-hand").innerHTML = papersInHand.join('<br />·<br />');
         } else {
           document.getElementById("hand-content").style.display = 'none';
         }
