@@ -160,10 +160,12 @@
 
       <button id="take-paper-button">Take Paper</button>
 
-      <p />
-      <p id="paper-in-hand">No papers in hand</p>
-      <button id="return-paper-button">Put All Cards Back</button>
-      <button id="discard-paper-button">Discard Cards in Hand</button>
+      <div id="hand-content" style="display: none;">
+        <p />
+        <p id="paper-in-hand">No papers in hand</p>
+        <button id="return-paper-button">Put All Cards Back</button>
+        <button id="discard-paper-button">Discard Cards in Hand</button>
+      </div>
     </div>
 
   </div>
@@ -198,7 +200,13 @@
         }
       });
 
+      // Put array of papers into the hat.
+      // newPapers: array of strings.
+      // Empty strings will be ignored and not inserted.
       function putPapersInHat(newPapers) {
+        const filteredNewPapers = newPapers.filter(function (x) {
+          return x;
+        });
         const roomId = state.roomId;
         firebase.firestore().runTransaction(transaction => {
           const docRef = db.collection('rooms').doc(roomId);
@@ -208,9 +216,13 @@
             if (!oldPapers) {
               oldPapers = [];
             }
-            const updatedPapers = oldPapers.concat(newPapers);
+            const updatedPapers = oldPapers.concat(filteredNewPapers);
             transaction.update(docRef, PAPERS_KEY, updatedPapers);
           });
+        }).then(function () {
+          console.log('Put', filteredNewPapers.length, 'paper(s) in hat');
+        }).catch(function (err) {
+          console.error('Error inserting a paper', err);
         });
         // Clear text field after submission.
         document.getElementById("word-input-text").value = "";
@@ -220,6 +232,7 @@
       document.getElementById("take-paper-button").addEventListener("click", function () {
         takePaper();
       });
+
       function takePaper() {
         const roomId = state.roomId;
         var removedPaper = null;
@@ -237,6 +250,7 @@
           });
         }).then(function () {
           putPaperInHand(removedPaper);
+          console.log('Took paper', removedPaper, 'from hat and put in hand');
         }).catch(function (err) {
           console.error('Error taking a paper', err);
         });
@@ -257,12 +271,20 @@
       });
 
       function discardAllCardsInHand() {
+        const discardCount = state.papersInHand.length;
         state.papersInHand = [];
         updateHandUI();
+        console.log('Discarded', discardCount, 'paper(s)');
       }
 
       function updateHandUI() {
-        document.getElementById("paper-in-hand").innerHTML = state.papersInHand;
+        const papersInHand = state.papersInHand;
+        if (papersInHand && papersInHand.length) {
+          document.getElementById("hand-content").style.display = 'block';
+          document.getElementById("paper-in-hand").innerHTML = papersInHand.join('<br />');
+        } else {
+          document.getElementById("hand-content").style.display = 'none';
+        }
       }
 
       function shuffle(a) {
