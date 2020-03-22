@@ -479,9 +479,7 @@
 
       // Firebase debugging information.
       try {
-        let app = firebase.app();
-        let features = ['firestore'].filter(feature => typeof app[feature] === 'function');
-        document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
+        document.getElementById('load').innerHTML = `Powered by Firebase`;
       } catch (e) {
         console.error(e);
         document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
