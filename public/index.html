@@ -95,6 +95,21 @@
       font-weight: bold;
     }
 
+    /* Container holding the image and the text */
+    .hat-container {
+      position: relative;
+      text-align: center;
+      color: white;
+    }
+
+    /* Centered text 70% away from top */
+    .centered-hat {
+      position: absolute;
+      top: 70%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
     @media (max-width: 600px) {
 
       body,
@@ -137,10 +152,15 @@
       <hr />
 
       <!-- Count of papers. -->
-      <p id="paper-in-hat-summary" style="display: inline;">&nbsp;<br />
-        <div id="paper-in-hat-count" class="user-data" style="display: inline;">&nbsp;</div>
+      <p id="paper-in-hat-summary">
+        Tap hat to take paper
       </p>
-      <button id="take-paper-button" style="visibility: hidden;">Take Paper</button>
+      <div class="hat-container">
+        <img id="hat-image" src="http://localhost:5000/hat-512x512.png" alt="Snow" style="width:25%;">
+        <div id="paper-in-hat-count" class="user-data centered-hat" style="display: inline;">&nbsp;</div>
+      </div>
+
+      <!-- <button id="take-paper-button" style="visibility: hidden;">Take Paper</button> -->
       <hr />
 
       <div id="hand-content" style="display: none;">
@@ -281,7 +301,7 @@
       }
 
       // Button for taking a paper.
-      document.getElementById("take-paper-button").addEventListener("click", function () {
+      document.getElementById("hat-image").addEventListener("click", function () {
         takePaper();
       });
 
@@ -420,14 +440,7 @@
       }
 
       function updatePaperCount(paperCount) {
-        document.getElementById('paper-in-hat-summary').innerHTML = 'Number of papers in hat<br />';
         document.getElementById('paper-in-hat-count').innerHTML = paperCount;
-
-        if (paperCount == 0) {
-          document.getElementById('take-paper-button').style.visibility = 'hidden';
-        } else {
-          document.getElementById('take-paper-button').style.visibility = 'visible';
-        }
       }
 
       function hideRoom() {
