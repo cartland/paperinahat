@@ -158,7 +158,7 @@
         <div id="paper-count" class="user-data" style="display: inline;">&nbsp;</div>
       </p>
 
-      <button id="take-paper-button">Take Paper</button>
+      <button id="take-paper-button" style="visibility: hidden;">Take Paper</button>
 
       <div id="hand-content" style="display: none;">
         <p />
@@ -429,6 +429,12 @@
       function updatePaperCount(paperCount) {
         document.getElementById('count-in-hat').innerHTML = 'Paper count<br />';
         document.getElementById('paper-count').innerHTML = paperCount;
+
+        if (paperCount == 0) {
+          document.getElementById('take-paper-button').style.visibility = 'hidden';
+        } else {
+          document.getElementById('take-paper-button').style.visibility = 'visible';
+        }
       }
 
       function hideRoom() {
