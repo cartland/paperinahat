@@ -51,25 +51,7 @@
       margin: 0 0 16px;
     }
 
-    #message p {
-      line-height: 140%;
-      margin: 16px 0 24px;
-      font-size: 14px;
-    }
-
-    #message a {
-      display: block;
-      text-align: center;
-      background: #039be5;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: white;
-      padding: 16px;
-      border-radius: 4px;
-    }
-
-    #message,
-    #message a {
+    #message {
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     }
 
@@ -135,7 +117,6 @@
   <div id="message">
     <h2>Papers in a Hat</h2>
 
-    <!-- TODO select room from lobby. -->
     <div id="lobby-content" style="display: none;">
       <input id="room-id-input-text" type="text" placeholder="ROOM ID">
       <button id="join-room-button">Join</button>
@@ -144,9 +125,11 @@
 
     <!-- TODO exit room and go to lobby. -->
     <div id="room-content" style="display: none;">
-      <p id="room-header" style="display: inline;">Room ID:
+      <h1 id="room-header" style="display: inline;">Room ID:
         <div id="room-id" class="user-data" style="display: inline;"></div>
-      </p>
+        (<a href="/" style="display: inline; text-transform: lowercase;">change</a>)
+      </h1>
+      <p />
 
       <!-- Insert new paper. -->
       <input id="word-input-text" type="text" placeholder="WRITE SOMETHING HERE">
