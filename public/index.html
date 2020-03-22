@@ -35,6 +35,7 @@
       margin: 100px auto 16px;
       padding: 32px 24px;
       border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     }
 
     #message h2 {
@@ -44,18 +45,9 @@
       margin: 0 0 8px;
     }
 
-    #message h1 {
-      font-size: 22px;
-      font-weight: 300;
-      color: rgba(0, 0, 0, 0.6);
-      margin: 0 0 16px;
-    }
+    #message {}
 
-    #message {
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    }
-
-    #load {
+    #footnote {
       color: rgba(0, 0, 0, 0.4);
       text-align: center;
       font-size: 13px;
@@ -74,6 +66,7 @@
       text-decoration: none;
       padding: 16px;
       border-radius: 4px;
+      margin-bottom: 8px;
     }
 
     button {
@@ -87,6 +80,7 @@
       color: white;
       padding: 16px;
       border-radius: 4px;
+      margin-bottom: 16px;
     }
 
     .system-label {
@@ -125,18 +119,18 @@
 
     <!-- TODO exit room and go to lobby. -->
     <div id="room-content" style="display: none;">
-      <h1 id="room-header" style="display: inline;">Room ID:
+      <div id="room-header">Room ID:
         <div id="room-id" class="user-data" style="display: inline;"></div>
         (<a href="/" style="display: inline; text-transform: lowercase;">change</a>)
-      </h1>
-      <p />
+      </div>
+      <hr />
 
       <!-- Insert new paper. -->
       <input id="word-input-text" type="text" placeholder="WRITE SOMETHING HERE">
       <button id="word-input-button">Insert Paper</button>
+      <hr />
 
       <!-- Count of papers. -->
-      <p />
       <p id="count-in-hat" style="display: inline;">&nbsp;<br />
         <div id="paper-count" class="user-data" style="display: inline;">&nbsp;</div>
       </p>
@@ -144,18 +138,23 @@
       <button id="take-paper-button" style="visibility: hidden;">Take Paper</button>
 
       <div id="hand-content" style="display: none;">
-        <p />
-        <p>Papers in hand</p>
+        <hr />
+        <p>Your papers</p>
         <b>
-          <p id="paper-in-hand">No papers in hand</p>
+          <p id="paper-in-hand" style="font-size: 32px;">No papers in hand</p>
         </b>
-        <button id="return-paper-button">Put All Papers Back</button>
-        <button id="discard-paper-button">Discard Papers in Hand</button>
+
+        <button id="return-paper-button" style="background: rgb(0, 155, 77)">♻️ Return Your Papers ♻️</button>
+        <button id="discard-paper-button" style="background: rgb(228, 5, 90)">🗑️ Discard Your Papers 🗑️</button>
       </div>
+      <hr />
     </div>
 
   </div>
-  <p id="load">Firebase SDK Loading&hellip;</p>
+  <p id="footnote">
+    By Chris Cartland
+    (<a href="https://github.com/cartland/papersinahat" target="_blank">source</a>)
+  </p>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
@@ -306,7 +305,7 @@
           console.error('Cannot put paper in hand!', paperForHand);
           return;
         }
-        state.papersInHand.push(paperForHand);
+        state.papersInHand.unshift(paperForHand);
         console.log('Put paper', paperForHand, 'in hand');
         updateHandUI();
       }
@@ -460,14 +459,6 @@
           return undefined;
         }
       });
-
-      // Firebase debugging information.
-      try {
-        document.getElementById('load').innerHTML = 'Powered by Firebase (<a href="https://github.com/cartland/papersinahat" target="_blank">source</a>)';
-      } catch (e) {
-        console.error(e);
-        document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
-      }
     });
   </script>
 </body>
