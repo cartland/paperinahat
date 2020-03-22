@@ -186,6 +186,68 @@
         papersInHand: []
       };
 
+      // Lobby.
+      // Button for joining a room.
+      document.getElementById("join-room-button").addEventListener("click", function () {
+        const roomId = document.getElementById("room-id-input-text").value.toUpperCase();
+        joinRoom(roomId);
+      });
+      // Enter button does the same thing as clicking the Join button.
+      document.getElementById("room-id-input-text").addEventListener("keyup", function (event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+          document.getElementById("join-room-button").click();
+        }
+      });
+      // Create room button.
+      document.getElementById("create-room-button").addEventListener("click", function () {
+        const DEFAULT_ROOM_ID_LENGTH = 4;
+        var roomIdLength = DEFAULT_ROOM_ID_LENGTH;
+        createRoomAndJoin(roomIdLength);
+      });
+
+      function createRoomAndJoin(roomIdLength) {
+        var roomIdCandidate = generateRoomIdCandidate(roomIdLength);
+        const docRef = db.collection('rooms').doc(roomIdCandidate);
+        docRef.get()
+          .then((docSnapshot) => {
+            if (docSnapshot.exists) {
+              // Try again.
+              console.error('Conflicting Room ID', roomIdCandidate);
+              createRoomAndJoin(roomIdLength + 1);
+            } else {
+              // Found room ID.
+              docRef.set({}) // Create empty document to reserve.
+              joinRoom(roomIdCandidate);
+            }
+          });
+      }
+
+      function generateRoomIdCandidate(roomIdLength) {
+        function randomStr(len, arr) {
+          var ans = '';
+          for (var i = len; i > 0; i--) {
+            ans +=
+              arr[Math.floor(Math.random() * arr.length)];
+          }
+          return ans;
+        }
+        function generateAlphabetArray() {
+          const A = 65;
+          const output = [];
+          for (var c = A; c < A + 26; c++) {
+            output.push(String.fromCharCode(c));
+          }
+          return output;
+        }
+        const characterSet = generateAlphabetArray();
+        return randomStr(roomIdLength, characterSet);
+      }
+
+      function joinRoom(roomId) {
+        window.location.href = '?r=' + roomId;
+      }
+
       // Button for inserting new papers.
       document.getElementById("word-input-button").addEventListener("click", function () {
         const newPaperText = document.getElementById("word-input-text").value.toUpperCase();
