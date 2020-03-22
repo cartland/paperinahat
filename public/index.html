@@ -131,23 +131,25 @@
       <hr />
 
       <!-- Count of papers. -->
-      <p id="count-in-hat" style="display: inline;">&nbsp;<br />
-        <div id="paper-count" class="user-data" style="display: inline;">&nbsp;</div>
+      <p id="paper-in-hat-summary" style="display: inline;">&nbsp;<br />
+        <div id="paper-in-hat-count" class="user-data" style="display: inline;">&nbsp;</div>
       </p>
-
       <button id="take-paper-button" style="visibility: hidden;">Take Paper</button>
+      <hr />
 
       <div id="hand-content" style="display: none;">
-        <hr />
-        <p>Your papers</p>
+        <p id="paper-in-hand-summary" style="display: inline;">&nbsp;<br />
+          <div id="paper-in-hand-count" class="user-data" style="display: inline;">&nbsp;</div>
+        </p>
+
         <b>
           <p id="paper-in-hand" style="font-size: 32px;">No papers in hand</p>
         </b>
 
         <button id="return-paper-button" style="background: rgb(0, 155, 77)">♻️ Return Your Papers ♻️</button>
         <button id="discard-paper-button" style="background: rgb(228, 5, 90)">🗑️ Discard Your Papers 🗑️</button>
+        <hr />
       </div>
-      <hr />
     </div>
 
   </div>
@@ -328,6 +330,8 @@
         if (papersInHand && papersInHand.length) {
           document.getElementById("hand-content").style.display = 'block';
           document.getElementById("paper-in-hand").innerHTML = papersInHand.join('<br />·<br />');
+          document.getElementById('paper-in-hand-summary').innerHTML = 'Your Papers<br />';
+          document.getElementById('paper-in-hand-count').innerHTML = papersInHand.length;
         } else {
           document.getElementById("hand-content").style.display = 'none';
         }
@@ -410,8 +414,8 @@
       }
 
       function updatePaperCount(paperCount) {
-        document.getElementById('count-in-hat').innerHTML = 'Number of papers in hat<br />';
-        document.getElementById('paper-count').innerHTML = paperCount;
+        document.getElementById('paper-in-hat-summary').innerHTML = 'Number of papers in hat<br />';
+        document.getElementById('paper-in-hat-count').innerHTML = paperCount;
 
         if (paperCount == 0) {
           document.getElementById('take-paper-button').style.visibility = 'hidden';
