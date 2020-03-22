@@ -7,5 +7,5 @@ https://paperinahat.firebaseapp.com/
 
 After you enter a room, you can share the URL with other people. You can also type in the meeting ID.
 
-![Screenshot of demo with 2 papers in hat and 3 papers in hand](screenshot.png)
+![Screenshot of demo with 2 papers in hat and 3 papers in hand](screenshot.jpg)
 
