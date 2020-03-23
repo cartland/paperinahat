@@ -297,7 +297,7 @@
       // // The Firebase SDK is initialized and available here!
       // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
       const db = firebase.firestore();
-      firebase.analytics();
+      const analytics = firebase.analytics();
 
       // Local state. This data is lost if the user refreshes the page.
       var state = {
@@ -309,6 +309,7 @@
       // Button for joining a room.
       document.getElementById("join-room-button").addEventListener("click", function () {
         const roomId = document.getElementById("room-id-input-text").value.toUpperCase();
+        analytics.logEvent('goal_completion', { name: 'join_room_with_meeting_id' });
         joinRoom(roomId);
       });
       // Enter button does the same thing as clicking the Join button.
@@ -337,6 +338,7 @@
             } else {
               // Found room ID.
               docRef.set({}) // Create empty document to reserve.
+              analytics.logEvent('goal_completion', { name: 'create_room_with_button' });
               joinRoom(roomIdCandidate);
             }
           });
@@ -371,6 +373,9 @@
       document.getElementById("word-input-button").addEventListener("click", function () {
         const newPaperText = document.getElementById("word-input-text").value.toUpperCase();
         putPapersInHat([newPaperText]);
+        if (newPaperText) {
+          analytics.logEvent('goal_completion', { name: 'insert_new_paper' });
+        }
       });
       // Enter button does the same thing as clicking the Insert button.
       document.getElementById("word-input-text").addEventListener("keyup", function (event) {
@@ -432,6 +437,7 @@
         }).then(function (removedPaper) {
           console.log('Took paper', removedPaper, 'from hat');
           putPaperInHand(removedPaper);
+          analytics.logEvent('goal_completion', { name: 'take_paper' });
         }).catch(function (err) {
           console.error('Error taking a paper.', err);
         });
@@ -450,6 +456,7 @@
       // Button for discarding papers.
       document.getElementById("discard-paper-button").addEventListener("click", function () {
         removeAllPapersInHand();
+        analytics.logEvent('goal_completion', { name: 'discard_all_papers_in_hand' });
       });
 
       function removeAllPapersInHand() {
@@ -497,6 +504,7 @@
         }
         putPapersInHat(papersInHand);
         removeAllPapersInHand();
+        analytics.logEvent('goal_completion', { name: 'put_back_all_papers' });
       }
 
       function displayRoom(roomId) {
@@ -507,6 +515,7 @@
         document.getElementById('room-id').innerHTML = roomId;
         createRoomIfRoomDoesNotExist(roomId);
         listenToPaperUpdates();
+        analytics.logEvent('goal_completion', { name: 'view_room' });
       }
 
       function createRoomIfRoomDoesNotExist(roomId) {
