@@ -515,7 +515,13 @@
         document.getElementById('room-id').innerHTML = roomId;
         createRoomIfRoomDoesNotExist(roomId);
         listenToPaperUpdates();
-        analytics.logEvent('goal_completion', { name: 'view_room' });
+        analytics.logEvent('view_item', {
+          items: [
+            {
+              name: 'Room:' + roomId
+            }
+          ]
+        });
       }
 
       function createRoomIfRoomDoesNotExist(roomId) {
