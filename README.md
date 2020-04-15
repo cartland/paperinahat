@@ -27,7 +27,7 @@ in different places.
 ## Manage the papers in your hand
 * You can hold multiple papers in your hand.
 * You can return all your papers by pressing the "Return Your Papers" button.
- * These papers will be shuffled back into the hat.
+  * These papers will be shuffled back into the hat.
 * You can discard all your papers by pressing the "Discard Your Papers" button.
 * If you close the browser window, papers in your hand will be discarded.
 
