@@ -1,11 +1,11 @@
 # Paper in a Hat
-[_Paper in a Hat_](https://paperinahat.firebaseapp.com) allows you to
+[_Paper in a Hat_](https://paperinahat.web.app) allows you to
 create a virtual room for people to contribute ideas and take one at random.
 This can be used for games like charades, even if people are on a video call
 in different places.
 
 ## Create a Room
-* Go to https://paperinahat.firebaseapp.com and tap "Create a Room".
+* Go to https://paperinahat.web.app and tap "Create a Room".
 
 ![Screenshot of creating a room](Screenshot_Create_a_Room.jpg)
 
@@ -31,3 +31,7 @@ in different places.
 * You can discard all your papers by pressing the "Discard Your Papers" button.
 * If you close the browser window, papers in your hand will be discarded.
 
+# Appendix
+* Firebase deploys the same app at 2 URLs. Both are identical and share the same database:
+  * https://paperinahat.firebaseapp.com
+  * https://paperinahat.web.app
