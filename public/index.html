@@ -280,7 +280,7 @@
           </b>
 
           <button id="return-paper-button" style="background: rgb(0, 155, 77)">♻️ Return Your Papers ♻️</button>
-          <button id="discard-paper-button" style="background: rgb(228, 5, 90)">🗑️ Discard Your Papers 🗑️</button>
+          <button id="delete-paper-button" style="background: rgb(228, 5, 90)">🗑️ Delete Your Papers 🗑️</button>
           <hr />
         </div>
       </div>
@@ -478,8 +478,8 @@
         updateHandUI();
       }
 
-      // Button for discarding papers.
-      document.getElementById("discard-paper-button").addEventListener("click", function () {
+      // Button for deleting papers.
+      document.getElementById("delete-paper-button").addEventListener("click", function () {
         removeAllPapersInHand();
         hideAddPaperSection();
         analytics.logEvent('goal_completion', { name: 'discard_all_papers_in_hand' });
