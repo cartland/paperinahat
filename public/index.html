@@ -123,6 +123,10 @@
       font-weight: bold;
     }
 
+    .hand {
+      font-size: 32px;
+    }
+
     /* Container holding the image and the text */
     .hat-container {
       position: relative;
@@ -254,7 +258,7 @@
       <!-- Insert new paper. -->
       <div id="add-paper-section">
         <input id="word-input-text" type="text" placeholder="Write Something Here">
-        <button id="word-input-button">Insert Paper</button>
+        <button id="word-input-button">➕Insert Paper➕</button>
       </div>
       <p id="show-add-paper-section" style="display: none;">
         ➕<u>Add papers</u>➕
@@ -268,27 +272,35 @@
 
       <div id="hand-management-section">
         <button id="take-paper-button" style="background: rgb(99, 99, 99)">⬇️Take Paper⬇️</button>
-        <hr />
-
         <div id="hand-content" style="display: none;">
           <p id="paper-in-hand-summary"></p>
-
           <b>
-            <p id="paper-in-hand" style="font-size: 32px;">No papers in hand</p>
+            <p id="paper-in-hand" class="hand">No papers in hand</p>
           </b>
-
-          <button id="return-paper-button" style="background: rgb(0, 155, 77)">♻️ Return Your Papers ♻️</button>
-          <button id="delete-paper-button" style="background: rgb(228, 5, 90)">🗑️ Delete Your Papers 🗑️</button>
           <hr />
         </div>
       </div>
+
+      <!-- Discard Pile. -->
+      <div id="discard-pile-section" style="display: none;">
+        <div id="discard-pile" class="paper hand" style="background: rgb(240, 150, 150)">
+          <div id="put-discard-pile-back-in-hat" style="display: inline; float: left;">🔄</div>
+          <div id="delete-papers-in-discard-pile" style="display: inline; float: right;">🗑️</div>
+          Discard Pile
+          (<div id="discard-pile-count" class="user-data" style="display: inline;">0</div>)
+        </div>
+      </div>
+
     </div>
 
   </div>
   <p id="footnote">
-    <a href="https://github.com/cartland/paperinahat/blob/master/README.md#paper-in-a-hat"
-      target="_blank">Instructions</a>
-    <br />
+    <b>Instructions</b><br />
+    ➕ Insert New Paper<br />
+    ⬇️ Take Random Card From Hat<br />
+    🔄 Shuffle Cards Back Into Hat<br />
+    ✖️ Discard From Hand<br />
+    🗑️ Delete Discard Pile<br />
     <br />
     By Chris Cartland
     <br />
@@ -306,7 +318,8 @@
       // Local state. This data is lost if the user refreshes the page.
       var state = {
         roomId: null, // Retrieved from URL parameter.
-        papersInHand: []
+        papersInHand: [],
+        discardPilePapers: []
       };
 
       // Lobby.
@@ -480,10 +493,16 @@
       }
 
       // Button for deleting papers.
-      document.getElementById("delete-paper-button").addEventListener("click", function () {
-        removeAllPapersInHand();
+      document.getElementById("delete-papers-in-discard-pile").addEventListener("click", function () {
+        deletePapersInDiscardPile();
         hideAddPaperSection();
         analytics.logEvent('goal_completion', { name: 'discard_all_papers_in_hand' });
+      });
+
+      // Button for deleting papers.
+      document.getElementById("put-discard-pile-back-in-hat").addEventListener("click", function () {
+        putDiscardPileBackInHat();
+        hideAddPaperSection();
       });
 
       function removeAllPapersInHand() {
@@ -494,6 +513,14 @@
         console.log('Removed papers:', removedPapers);
       }
 
+      function deletePapersInDiscardPile() {
+        const discardPilePapers = state.discardPilePapers;
+        state.discardPilePapers = [];
+        updateHandUI();
+        console.log('Deleted', discardPilePapers.length, 'paper(s) from discard pile');
+        console.log('Deleted papers:', discardPilePapers);
+      }
+
       function deleteOnePaper(index) {
         const papersInHand = state.papersInHand;
         const removedPapers = [papersInHand[index]];
@@ -501,6 +528,17 @@
         updateHandUI();
         console.log('Removed', removedPapers.length, 'paper(s) from hand');
         console.log('Removed papers:', removedPapers);
+      }
+
+      function discardOnePaper(index) {
+        const papersInHand = state.papersInHand;
+        const discardPilePapers = state.discardPilePapers;
+        const discardedPapers = [papersInHand[index]];
+        papersInHand.splice(index, 1);
+        state.discardPilePapers = discardPilePapers.concat(discardedPapers);
+        updateHandUI();
+        console.log('Discarded', discardedPapers.length, 'paper(s) from hand');
+        console.log('Discarded papers:', discardedPapers);
       }
 
       function updateHandUI() {
@@ -516,6 +554,8 @@
         } else {
           document.getElementById("hand-content").style.display = 'none';
         }
+        const discardPilePapers = state.discardPilePapers;
+        updateDiscardPileCount(discardPilePapers.length);
       }
 
       function createPaperDiv(index, paper) {
@@ -523,14 +563,14 @@
         div.className = 'paper';
         // Create return icon, text, and delete icon.
         const returnPaperIcon = document.createElement('div');
-        returnPaperIcon.innerHTML = '♻️';
+        returnPaperIcon.innerHTML = '🔄';
         returnPaperIcon.style.display = 'inline';
         returnPaperIcon.style.float = 'left';
         const paperTextDiv = document.createElement('div');
-        paperTextDiv.innerHTML = paper;
+        paperTextDiv.append(paper);
         paperTextDiv.style.display = 'inline';
         const deletePaperIcon = document.createElement('div');
-        deletePaperIcon.innerHTML = '🗑️';
+        deletePaperIcon.innerHTML = '✖️';
         deletePaperIcon.style.display = 'inline';
         deletePaperIcon.style.float = 'right';
         // Add text to div.
@@ -542,7 +582,7 @@
           returnOnePaper(i);
         });
         deletePaperIcon.addEventListener('click', function () {
-          deleteOnePaper(i);
+          discardOnePaper(i);
         });
         return div;
       }
@@ -555,12 +595,6 @@
         return a;
       }
 
-      // Button to return all papers.
-      document.getElementById("return-paper-button").addEventListener("click", function () {
-        putBackAllPapersInHand();
-        hideAddPaperSection();
-      });
-
       function putBackAllPapersInHand() {
         const papersInHand = state.papersInHand;
         if (!papersInHand) {
@@ -569,6 +603,20 @@
         }
         putPapersInHat(papersInHand);
         removeAllPapersInHand();
+        analytics.logEvent('goal_completion', { name: 'put_back_all_papers' });
+      }
+
+      function putDiscardPileBackInHat() {
+        const discardPilePapers = state.discardPilePapers;
+        if (!discardPilePapers) {
+          console.error('No papers in discard pile!');
+          return;
+        }
+        putPapersInHat(discardPilePapers);
+        state.discardPilePapers = [];
+        updateHandUI();
+        console.log('Put ', discardPilePapers.length, 'paper(s) from discard pile in hat');
+        console.log('Moved papers:', discardPilePapers);
         analytics.logEvent('goal_completion', { name: 'put_back_all_papers' });
       }
 
@@ -650,6 +698,16 @@
         document.getElementById('paper-in-hat-count').innerHTML = paperCount;
       }
 
+      function updateDiscardPileCount(count) {
+        document.getElementById('discard-pile-count').innerHTML = count;
+        console.log('Discard Pile Count: ', count);
+        if (count > 0) {
+          document.getElementById('discard-pile-section').style.display = 'block';
+        } else {
+          document.getElementById('discard-pile-section').style.display = 'none';
+        }
+      }
+
       function hideRoom() {
         document.getElementById('room-content').style.display = 'none';
       }
@@ -685,9 +743,15 @@
             + 'If you leave, the papers will be lost.';
           (e || window.event).returnValue = confirmationMessage; // Gecko + IE
           return confirmationMessage; // Gecko + Webkit, Safari, Chrome etc.
-        } else {
-          return undefined;
         }
+        const discardPilePapers = state.discardPilePapers;
+        if (discardPilePapers && discardPilePapers.length) {
+          var confirmationMessage = 'You have ' + discardPilePapers.length + ' papers in discard pile.'
+            + 'If you leave, the papers will be lost.';
+          (e || window.event).returnValue = confirmationMessage; // Gecko + IE
+          return confirmationMessage; // Gecko + Webkit, Safari, Chrome etc.
+        }
+        return undefined;
       });
     });
   </script>
