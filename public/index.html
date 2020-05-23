@@ -271,13 +271,12 @@
       </div>
 
       <div id="hand-management-section">
-        <button id="take-paper-button" style="background: rgb(99, 99, 99)">⬇️Take Paper⬇️</button>
+        <button id="take-paper-button" style="background: rgb(99, 99, 99); display: none;">⬇️Take Paper⬇️</button>
         <div id="hand-content" style="display: none;">
           <p id="paper-in-hand-summary"></p>
           <b>
             <p id="paper-in-hand" class="hand">No papers in hand</p>
           </b>
-          <hr />
         </div>
       </div>
 
@@ -580,9 +579,11 @@
         const i = index;
         returnPaperIcon.addEventListener('click', function () {
           returnOnePaper(i);
+          hideAddPaperSection();
         });
         deletePaperIcon.addEventListener('click', function () {
           discardOnePaper(i);
+          hideAddPaperSection();
         });
         return div;
       }
@@ -696,6 +697,11 @@
 
       function updatePaperCount(paperCount) {
         document.getElementById('paper-in-hat-count').innerHTML = paperCount;
+        if (paperCount > 0) {
+          document.getElementById('take-paper-button').style.display = 'block';
+        } else {
+          document.getElementById('take-paper-button').style.display = 'none';
+        }
       }
 
       function updateDiscardPileCount(count) {
