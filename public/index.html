@@ -504,14 +504,6 @@
         hideAddPaperSection();
       });
 
-      function removeAllPapersInHand() {
-        const removedPapers = state.papersInHand;
-        state.papersInHand = [];
-        updateHandUI();
-        console.log('Removed', removedPapers.length, 'paper(s) from hand');
-        console.log('Removed papers:', removedPapers);
-      }
-
       function deletePapersInDiscardPile() {
         const discardPilePapers = state.discardPilePapers;
         state.discardPilePapers = [];
@@ -520,20 +512,12 @@
         console.log('Deleted papers:', discardPilePapers);
       }
 
-      function deleteOnePaper(index) {
-        const papersInHand = state.papersInHand;
-        const removedPapers = [papersInHand[index]];
-        papersInHand.splice(index, 1);
-        updateHandUI();
-        console.log('Removed', removedPapers.length, 'paper(s) from hand');
-        console.log('Removed papers:', removedPapers);
-      }
-
       function discardOnePaper(index) {
         const papersInHand = state.papersInHand;
         const discardPilePapers = state.discardPilePapers;
         const discardedPapers = [papersInHand[index]];
         papersInHand.splice(index, 1);
+        state.papersInHand = papersInHand;
         state.discardPilePapers = discardPilePapers.concat(discardedPapers);
         updateHandUI();
         console.log('Discarded', discardedPapers.length, 'paper(s) from hand');
@@ -594,17 +578,6 @@
           [a[i], a[j]] = [a[j], a[i]];
         }
         return a;
-      }
-
-      function putBackAllPapersInHand() {
-        const papersInHand = state.papersInHand;
-        if (!papersInHand) {
-          console.error('No papers in hand!');
-          return;
-        }
-        putPapersInHat(papersInHand);
-        removeAllPapersInHand();
-        analytics.logEvent('goal_completion', { name: 'put_back_all_papers' });
       }
 
       function putDiscardPileBackInHat() {
