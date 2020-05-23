@@ -252,34 +252,37 @@
       <hr />
 
       <!-- Insert new paper. -->
-      <input id="word-input-text" type="text" placeholder="Write Something Here">
-      <button id="word-input-button">Insert Paper</button>
-      <hr />
-
-      <!-- Count of papers. -->
-      <p id="paper-in-hat-summary">
-        Tap hat to take paper
+      <div id="add-paper-section">
+        <input id="word-input-text" type="text" placeholder="Write Something Here">
+        <button id="word-input-button">Insert Paper</button>
+      </div>
+      <p id="show-add-paper-section" style="display: none;">
+        ➕Add papers➕
       </p>
+
+      <!-- Hat. -->
       <div class="hat-container">
         <img id="hat-image" src="hat-512x512.png" alt="Snow" style="width:25%;">
         <div id="paper-in-hat-count" class="user-data centered-hat" style="display: inline;">&nbsp;</div>
       </div>
 
-      <button id="take-paper-button" style="background: rgb(99, 99, 99)">⬇️Take Paper⬇️</button>
-      <hr />
-
-      <div id="hand-content" style="display: none;">
-        <p id="paper-in-hand-summary" style="display: inline;">&nbsp;<br />
-          <div id="paper-in-hand-count" class="user-data" style="display: inline;">&nbsp;</div>
-        </p>
-
-        <b>
-          <p id="paper-in-hand" style="font-size: 32px;">No papers in hand</p>
-        </b>
-
-        <button id="return-paper-button" style="background: rgb(0, 155, 77)">♻️ Return Your Papers ♻️</button>
-        <button id="discard-paper-button" style="background: rgb(228, 5, 90)">🗑️ Discard Your Papers 🗑️</button>
+      <div id="hand-management-section">
+        <button id="take-paper-button" style="background: rgb(99, 99, 99)">⬇️Take Paper⬇️</button>
         <hr />
+
+        <div id="hand-content" style="display: none;">
+          <p id="paper-in-hand-summary" style="display: inline;">&nbsp;<br />
+            <div id="paper-in-hand-count" class="user-data" style="display: inline;">&nbsp;</div>
+          </p>
+
+          <b>
+            <p id="paper-in-hand" style="font-size: 32px;">No papers in hand</p>
+          </b>
+
+          <button id="return-paper-button" style="background: rgb(0, 155, 77)">♻️ Return Your Papers ♻️</button>
+          <button id="discard-paper-button" style="background: rgb(228, 5, 90)">🗑️ Discard Your Papers 🗑️</button>
+          <hr />
+        </div>
       </div>
     </div>
 
@@ -311,6 +314,7 @@
         const roomId = document.getElementById("room-id-input-text").value.toUpperCase();
         analytics.logEvent('goal_completion', { name: 'join_room_with_meeting_id' });
         joinRoom(roomId);
+        showAddPaperSection();
       });
       // Enter button does the same thing as clicking the Join button.
       document.getElementById("room-id-input-text").addEventListener("keyup", function (event) {
@@ -324,6 +328,7 @@
         const DEFAULT_ROOM_ID_LENGTH = 4;
         var roomIdLength = DEFAULT_ROOM_ID_LENGTH;
         createRoomAndJoin(roomIdLength);
+        showAddPaperSection();
       });
 
       function createRoomAndJoin(roomIdLength) {
@@ -373,6 +378,7 @@
       document.getElementById("word-input-button").addEventListener("click", function () {
         const newPaperText = document.getElementById("word-input-text").value.toUpperCase();
         putPapersInHat([newPaperText]);
+        showAddPaperSection();
         if (newPaperText) {
           analytics.logEvent('goal_completion', { name: 'insert_new_paper' });
         }
@@ -415,11 +421,27 @@
       }
 
       // Button for taking a paper.
+      document.getElementById("show-add-paper-section").addEventListener("click", function () {
+        showAddPaperSection();
+      });
+
+      function showAddPaperSection() {
+        document.getElementById("add-paper-section").style.display = 'block';
+        document.getElementById("show-add-paper-section").style.display = 'none';
+      }
+      function hideAddPaperSection() {
+        document.getElementById("add-paper-section").style.display = 'none';
+        document.getElementById("show-add-paper-section").style.display = 'block';
+      }
+
+      // Button for taking a paper.
       document.getElementById("hat-image").addEventListener("click", function () {
         takePaper();
+        hideAddPaperSection();
       });
       document.getElementById("take-paper-button").addEventListener("click", function () {
         takePaper();
+        hideAddPaperSection();
       });
 
       function takePaper() {
@@ -459,6 +481,7 @@
       // Button for discarding papers.
       document.getElementById("discard-paper-button").addEventListener("click", function () {
         removeAllPapersInHand();
+        hideAddPaperSection();
         analytics.logEvent('goal_completion', { name: 'discard_all_papers_in_hand' });
       });
 
@@ -497,6 +520,7 @@
       // Button to return all papers.
       document.getElementById("return-paper-button").addEventListener("click", function () {
         putBackAllPapersInHand();
+        hideAddPaperSection();
       });
 
       function putBackAllPapersInHand() {
