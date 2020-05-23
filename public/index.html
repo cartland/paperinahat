@@ -271,9 +271,7 @@
         <hr />
 
         <div id="hand-content" style="display: none;">
-          <p id="paper-in-hand-summary" style="display: inline;">&nbsp;<br />
-            <div id="paper-in-hand-count" class="user-data" style="display: inline;">&nbsp;</div>
-          </p>
+          <p id="paper-in-hand-summary"></p>
 
           <b>
             <p id="paper-in-hand" style="font-size: 32px;">No papers in hand</p>
@@ -496,20 +494,57 @@
         console.log('Removed papers:', removedPapers);
       }
 
+      function deleteOnePaper(index) {
+        const papersInHand = state.papersInHand;
+        const removedPapers = [papersInHand[index]];
+        papersInHand.splice(index, 1);
+        updateHandUI();
+        console.log('Removed', removedPapers.length, 'paper(s) from hand');
+        console.log('Removed papers:', removedPapers);
+      }
+
       function updateHandUI() {
         const papersInHand = state.papersInHand;
         if (papersInHand && papersInHand.length) {
           document.getElementById("hand-content").style.display = 'block';
-          document.getElementById("paper-in-hand").innerHTML = papersInHand.map(makePaperElement).join('');
-          document.getElementById('paper-in-hand-summary').innerHTML = 'Your Papers<br />';
-          document.getElementById('paper-in-hand-count').innerHTML = papersInHand.length;
+          const paperInHandElement = document.getElementById("paper-in-hand");
+          paperInHandElement.innerHTML = '';
+          for (let i = 0; i < papersInHand.length; i++) {
+            const thisPaper = papersInHand[i];
+            paperInHandElement.append(createPaperDiv(i, thisPaper));
+          }
         } else {
           document.getElementById("hand-content").style.display = 'none';
         }
       }
 
-      function makePaperElement(currentValue, index, arr) {
-        return '<div class="paper">' + currentValue + '</div>';
+      function createPaperDiv(index, paper) {
+        const div = document.createElement('div');
+        div.className = 'paper';
+        // Create return icon, text, and delete icon.
+        const returnPaperIcon = document.createElement('div');
+        returnPaperIcon.innerHTML = '♻️';
+        returnPaperIcon.style.display = 'inline';
+        returnPaperIcon.style.float = 'left';
+        const paperTextDiv = document.createElement('div');
+        paperTextDiv.innerHTML = paper;
+        paperTextDiv.style.display = 'inline';
+        const deletePaperIcon = document.createElement('div');
+        deletePaperIcon.innerHTML = '🗑️';
+        deletePaperIcon.style.display = 'inline';
+        deletePaperIcon.style.float = 'right';
+        // Add text to div.
+        div.append(returnPaperIcon);
+        div.append(deletePaperIcon);
+        div.append(paperTextDiv);
+        const i = index;
+        returnPaperIcon.addEventListener('click', function () {
+          returnOnePaper(i);
+        });
+        deletePaperIcon.addEventListener('click', function () {
+          deleteOnePaper(i);
+        });
+        return div;
       }
 
       function shuffle(a) {
@@ -535,6 +570,20 @@
         putPapersInHat(papersInHand);
         removeAllPapersInHand();
         analytics.logEvent('goal_completion', { name: 'put_back_all_papers' });
+      }
+
+      function returnOnePaper(index) {
+        const papersInHand = state.papersInHand;
+        if (!papersInHand) {
+          console.error('No papers in hand!');
+          return;
+        }
+        const returnedPapers = [papersInHand[index]];
+        putPapersInHat(returnedPapers);
+        papersInHand.splice(index, 1);
+        updateHandUI();
+        console.log('Removed', returnedPapers.length, 'paper(s) from hand');
+        console.log('Returned papers:', returnedPapers);
       }
 
       function displayRoom(roomId) {
