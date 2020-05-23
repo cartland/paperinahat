@@ -258,10 +258,10 @@
       <!-- Insert new paper. -->
       <div id="add-paper-section">
         <input id="word-input-text" type="text" placeholder="Write Something Here">
-        <button id="word-input-button">➕Insert Paper➕</button>
+        <button id="word-input-button">➕ Insert Paper ➕</button>
       </div>
       <p id="show-add-paper-section" style="display: none;">
-        ➕<u>Add papers</u>➕
+        ➕ <u>Add papers</u> ➕
       </p>
 
       <!-- Hat. -->
@@ -271,7 +271,7 @@
       </div>
 
       <div id="hand-management-section">
-        <button id="take-paper-button" style="background: rgb(99, 99, 99); display: none;">⬇️Take Paper⬇️</button>
+        <button id="take-paper-button" disabled>⬇️ Take a Paper ⬇️</button>
         <div id="hand-content" style="display: none;">
           <p id="paper-in-hand-summary"></p>
           <b>
@@ -439,12 +439,10 @@
       });
 
       function showAddPaperSection() {
-        document.getElementById("add-paper-section").style.display = 'block';
-        document.getElementById("show-add-paper-section").style.display = 'none';
+        // No-op.
       }
       function hideAddPaperSection() {
-        document.getElementById("add-paper-section").style.display = 'none';
-        document.getElementById("show-add-paper-section").style.display = 'block';
+        // No-op.
       }
 
       // Button for taking a paper.
@@ -671,9 +669,9 @@
       function updatePaperCount(paperCount) {
         document.getElementById('paper-in-hat-count').innerHTML = paperCount;
         if (paperCount > 0) {
-          document.getElementById('take-paper-button').style.display = 'block';
+          document.getElementById('take-paper-button').disabled = false;
         } else {
-          document.getElementById('take-paper-button').style.display = 'none';
+          document.getElementById('take-paper-button').disabled = true;
         }
       }
 
