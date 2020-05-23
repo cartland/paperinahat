@@ -265,7 +265,7 @@
         <div id="paper-in-hat-count" class="user-data centered-hat" style="display: inline;">&nbsp;</div>
       </div>
 
-      <!-- <button id="take-paper-button" style="visibility: hidden;">Take Paper</button> -->
+      <button id="take-paper-button" style="background: rgb(99, 99, 99)">⬇️Take Paper⬇️</button>
       <hr />
 
       <div id="hand-content" style="display: none;">
@@ -416,6 +416,9 @@
 
       // Button for taking a paper.
       document.getElementById("hat-image").addEventListener("click", function () {
+        takePaper();
+      });
+      document.getElementById("take-paper-button").addEventListener("click", function () {
         takePaper();
       });
 
