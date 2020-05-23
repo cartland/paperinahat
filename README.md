@@ -7,8 +7,6 @@ in different places.
 ## Create a Room
 * Go to https://paperinahat.web.app and tap "Create a Room".
 
-![Screenshot of creating a room](Screenshot_Create_a_Room.jpg)
-
 ## Share the Room
 * Share the room ID with other people so they can join your room.
 * You can also share the URL so people do not need to type the room ID.
@@ -17,12 +15,8 @@ in different places.
 * Type something in the text field and tap "Insert Paper".
 * The number on the hat shows how many papers are in the hat.
 
-![Screenshot of writing something to insert a paper to the hat](Screenshot_Insert_a_Paper.jpg)
-
 ## Take a Paper
 * Tap the hat in order to take a paper.
-
-![Screenshot of taking a paper from the hat and putting it back](Screenshot_Take_a_Paper.jpg)
 
 ## Manage the papers in your hand
 * You can hold multiple papers in your hand.
