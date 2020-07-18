@@ -318,11 +318,12 @@
       const db = firebase.firestore();
       const analytics = firebase.analytics();
 
-      // Local state. This data is lost if the user refreshes the page.
+      // Local state.
       var state = {
         roomId: null, // Retrieved from URL parameter.
         papersInHand: [],
-        discardPilePapers: []
+        discardPilePapers: [],
+        localStorageSession: ''
       };
 
       // Lobby.
@@ -349,7 +350,7 @@
       });
 
       function createRoomAndJoin(roomIdLength) {
-        var roomIdCandidate = generateRoomIdCandidate(roomIdLength);
+        var roomIdCandidate = generateAlphaString(roomIdLength);
         const docRef = db.collection('rooms').doc(roomIdCandidate);
         docRef.get()
           .then((docSnapshot) => {
@@ -366,23 +367,25 @@
           });
       }
 
-      function generateRoomIdCandidate(roomIdLength) {
-        function randomStr(len, arr) {
-          var ans = '';
-          for (var i = len; i > 0; i--) {
-            ans +=
-              arr[Math.floor(Math.random() * arr.length)];
-          }
-          return ans;
+      function randomStr(len, arr) {
+        var ans = '';
+        for (var i = len; i > 0; i--) {
+          ans +=
+            arr[Math.floor(Math.random() * arr.length)];
         }
-        function generateAlphabetArray() {
-          const A = 65;
-          const output = [];
-          for (var c = A; c < A + 26; c++) {
-            output.push(String.fromCharCode(c));
-          }
-          return output;
+        return ans;
+      }
+
+      function generateAlphabetArray() {
+        const A = 65;
+        const output = [];
+        for (var c = A; c < A + 26; c++) {
+          output.push(String.fromCharCode(c));
         }
+        return output;
+      }
+
+      function generateAlphaString(roomIdLength) {
         const characterSet = generateAlphabetArray();
         return randomStr(roomIdLength, characterSet);
       }
@@ -484,12 +487,14 @@
       }
 
       function putPaperInHand(paperForHand) {
+        console.log('putPaperInHand() Using local storage session:', state.localStorageSession);
         if (!paperForHand) {
           console.error('Cannot put paper in hand!', paperForHand);
           return;
         }
         state.papersInHand.unshift(paperForHand);
         console.log('Put paper', paperForHand, 'in hand');
+        updateLocalStorageState(state);
         updateHandUI();
       }
 
@@ -507,26 +512,31 @@
       });
 
       function deletePapersInDiscardPile() {
+        console.log('deletePapersInDiscardPile() Using local storage session:', state.localStorageSession);
         const discardPilePapers = state.discardPilePapers;
         state.discardPilePapers = [];
+        updateLocalStorageState(state);
         updateHandUI();
         console.log('Deleted', discardPilePapers.length, 'paper(s) from discard pile');
         console.log('Deleted papers:', discardPilePapers);
       }
 
       function discardOnePaper(index) {
+        console.log('discardOnePaper() Using local storage session:', state.localStorageSession);
         const papersInHand = state.papersInHand;
         const discardPilePapers = state.discardPilePapers;
         const discardedPapers = [papersInHand[index]];
         papersInHand.splice(index, 1);
         state.papersInHand = papersInHand;
         state.discardPilePapers = discardPilePapers.concat(discardedPapers);
+        updateLocalStorageState(state);
         updateHandUI();
         console.log('Discarded', discardedPapers.length, 'paper(s) from hand');
         console.log('Discarded papers:', discardedPapers);
       }
 
       function updateHandUI() {
+        console.log('updateHandUI() Using local storage session:', state.localStorageSession);
         const papersInHand = state.papersInHand;
         if (papersInHand && papersInHand.length) {
           document.getElementById("hand-content").style.display = 'block';
@@ -583,6 +593,7 @@
       }
 
       function putDiscardPileBackInHat() {
+        console.log('putDiscardPileBackInHat() Using local storage session:', state.localStorageSession);
         const discardPilePapers = state.discardPilePapers;
         if (!discardPilePapers) {
           console.error('No papers in discard pile!');
@@ -590,6 +601,7 @@
         }
         putPapersInHat(discardPilePapers);
         state.discardPilePapers = [];
+        updateLocalStorageState(state);
         updateHandUI();
         console.log('Put ', discardPilePapers.length, 'paper(s) from discard pile in hat');
         console.log('Moved papers:', discardPilePapers);
@@ -597,6 +609,7 @@
       }
 
       function returnOnePaper(index) {
+        console.log('returnOnePaper() Using local storage session:', state.localStorageSession);
         const papersInHand = state.papersInHand;
         if (!papersInHand) {
           console.error('No papers in hand!');
@@ -605,6 +618,7 @@
         const returnedPapers = [papersInHand[index]];
         putPapersInHat(returnedPapers);
         papersInHand.splice(index, 1);
+        updateLocalStorageState(state);
         updateHandUI();
         console.log('Removed', returnedPapers.length, 'paper(s) from hand');
         console.log('Returned papers:', returnedPapers);
@@ -618,6 +632,7 @@
         document.getElementById('room-id').innerHTML = roomId;
         createRoomIfRoomDoesNotExist(roomId);
         listenToPaperUpdates();
+        initializeLocalStorageSession();
         analytics.logEvent('view_item', {
           items: [
             {
@@ -627,8 +642,48 @@
         });
       }
 
+      function initializeLocalStorageSession() {
+        const LOCAL_STORAGE_SESSION_KEY = 'LOCAL_STORAGE_SESSION_KEY';
+        const oldLocalStorageSession = localStorage.getItem(LOCAL_STORAGE_SESSION_KEY);
+        if (!oldLocalStorageSession) {
+          const newLocalStorageSession = generateAlphaString(12);
+          console.log('New local storage session:', newLocalStorageSession);
+          localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, newLocalStorageSession);
+
+        } else {
+          console.log('Old local storage session:', oldLocalStorageSession);
+        }
+        state.localStorageSession = localStorage.getItem(LOCAL_STORAGE_SESSION_KEY);
+        const roomId = state.roomId;
+        const localStorageSession = state.localStorageSession;
+        getStateFromLocalStorage(roomId, localStorageSession);
+      }
+
+      function getStateFromLocalStorage(roomId, localStorageSession) {
+        const docRef = db.collection('rooms').doc(roomId).collection('localStorageState').doc(localStorageSession);
+        docRef.get()
+          .then((docSnapshot) => {
+            if (docSnapshot.exists) {
+              const docData = docSnapshot.data();
+              console.log('getStateFromLocalStorage() docData', docData);
+              Object.assign(state, docData);
+              console.log('getStateFromLocalStorage() state', state);
+            } else {
+              console.log('getStateFromLocalStorage() no existing state found');
+            }
+            updateHandUI();
+          });
+      }
+
+      function updateLocalStorageState(state) {
+        const roomId = state.roomId;
+        const localStorageSession = state.localStorageSession;
+        const docRef = db.collection('rooms').doc(roomId).collection('localStorageState').doc(localStorageSession);
+        docRef.set(state);
+      }
+
       function createRoomIfRoomDoesNotExist(roomId) {
-        // We need to be able to add items to the documente in a Firestore Transaction.
+        // We need to be able to add items to the document in a Firestore Transaction.
         // Transactions can only be run if the document already exists.
         // This ensures that any transactions are run on an existing document.
         // There is a race condition where multiple clients could try to
@@ -714,26 +769,6 @@
         displayLobby();
       }
 
-      // Warn users before losing data.
-      // Custom messages are not supported in many browsers.
-      // https://stackoverflow.com/a/7317311
-      window.addEventListener("beforeunload", function (e) {
-        const papersInHand = state.papersInHand;
-        if (papersInHand && papersInHand.length) {
-          var confirmationMessage = 'You have ' + papersInHand.length + ' papers in your hand.'
-            + 'If you leave, the papers will be lost.';
-          (e || window.event).returnValue = confirmationMessage; // Gecko + IE
-          return confirmationMessage; // Gecko + Webkit, Safari, Chrome etc.
-        }
-        const discardPilePapers = state.discardPilePapers;
-        if (discardPilePapers && discardPilePapers.length) {
-          var confirmationMessage = 'You have ' + discardPilePapers.length + ' papers in discard pile.'
-            + 'If you leave, the papers will be lost.';
-          (e || window.event).returnValue = confirmationMessage; // Gecko + IE
-          return confirmationMessage; // Gecko + Webkit, Safari, Chrome etc.
-        }
-        return undefined;
-      });
     });
   </script>
 </body>
