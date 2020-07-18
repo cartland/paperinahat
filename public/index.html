@@ -321,9 +321,11 @@
       // Local state.
       var state = {
         roomId: null, // Retrieved from URL parameter.
-        papersInHand: [],
-        discardPilePapers: [],
-        localStorageSession: ''
+        localStorageSession: '',
+        hand: {
+          papersInHand: [],
+          discardPilePapers: []
+        }
       };
 
       // Lobby.
@@ -487,15 +489,13 @@
       }
 
       function putPaperInHand(paperForHand) {
-        console.log('putPaperInHand() Using local storage session:', state.localStorageSession);
         if (!paperForHand) {
           console.error('Cannot put paper in hand!', paperForHand);
           return;
         }
-        state.papersInHand.unshift(paperForHand);
+        state.hand.papersInHand.unshift(paperForHand);
         console.log('Put paper', paperForHand, 'in hand');
         updateLocalStorageState(state);
-        updateHandUI();
       }
 
       // Button for deleting papers.
@@ -512,32 +512,28 @@
       });
 
       function deletePapersInDiscardPile() {
-        console.log('deletePapersInDiscardPile() Using local storage session:', state.localStorageSession);
-        const discardPilePapers = state.discardPilePapers;
-        state.discardPilePapers = [];
+        const discardPilePapers = state.hand.discardPilePapers;
+        state.hand.discardPilePapers = [];
         updateLocalStorageState(state);
-        updateHandUI();
         console.log('Deleted', discardPilePapers.length, 'paper(s) from discard pile');
         console.log('Deleted papers:', discardPilePapers);
       }
 
       function discardOnePaper(index) {
-        console.log('discardOnePaper() Using local storage session:', state.localStorageSession);
-        const papersInHand = state.papersInHand;
-        const discardPilePapers = state.discardPilePapers;
+        const papersInHand = state.hand.papersInHand;
+        const discardPilePapers = state.hand.discardPilePapers;
         const discardedPapers = [papersInHand[index]];
         papersInHand.splice(index, 1);
-        state.papersInHand = papersInHand;
-        state.discardPilePapers = discardPilePapers.concat(discardedPapers);
+        state.hand.papersInHand = papersInHand;
+        state.hand.discardPilePapers = discardPilePapers.concat(discardedPapers);
         updateLocalStorageState(state);
-        updateHandUI();
         console.log('Discarded', discardedPapers.length, 'paper(s) from hand');
         console.log('Discarded papers:', discardedPapers);
       }
 
-      function updateHandUI() {
-        console.log('updateHandUI() Using local storage session:', state.localStorageSession);
-        const papersInHand = state.papersInHand;
+      function updateHandUI(state) {
+        console.log('updateHandUI()');
+        const papersInHand = state.hand.papersInHand;
         if (papersInHand && papersInHand.length) {
           document.getElementById("hand-content").style.display = 'block';
           const paperInHandElement = document.getElementById("paper-in-hand");
@@ -549,7 +545,7 @@
         } else {
           document.getElementById("hand-content").style.display = 'none';
         }
-        const discardPilePapers = state.discardPilePapers;
+        const discardPilePapers = state.hand.discardPilePapers;
         updateDiscardPileCount(discardPilePapers.length);
       }
 
@@ -593,24 +589,21 @@
       }
 
       function putDiscardPileBackInHat() {
-        console.log('putDiscardPileBackInHat() Using local storage session:', state.localStorageSession);
-        const discardPilePapers = state.discardPilePapers;
+        const discardPilePapers = state.hand.discardPilePapers;
         if (!discardPilePapers) {
           console.error('No papers in discard pile!');
           return;
         }
         putPapersInHat(discardPilePapers);
-        state.discardPilePapers = [];
+        state.hand.discardPilePapers = [];
         updateLocalStorageState(state);
-        updateHandUI();
         console.log('Put ', discardPilePapers.length, 'paper(s) from discard pile in hat');
         console.log('Moved papers:', discardPilePapers);
         analytics.logEvent('goal_completion', { name: 'put_back_all_papers' });
       }
 
       function returnOnePaper(index) {
-        console.log('returnOnePaper() Using local storage session:', state.localStorageSession);
-        const papersInHand = state.papersInHand;
+        const papersInHand = state.hand.papersInHand;
         if (!papersInHand) {
           console.error('No papers in hand!');
           return;
@@ -618,8 +611,8 @@
         const returnedPapers = [papersInHand[index]];
         putPapersInHat(returnedPapers);
         papersInHand.splice(index, 1);
+        state.hand.papersInHand = papersInHand;
         updateLocalStorageState(state);
-        updateHandUI();
         console.log('Removed', returnedPapers.length, 'paper(s) from hand');
         console.log('Returned papers:', returnedPapers);
       }
@@ -631,8 +624,9 @@
         document.getElementById('room-content').style.display = 'block';
         document.getElementById('room-id').innerHTML = roomId;
         createRoomIfRoomDoesNotExist(roomId);
-        listenToPaperUpdates();
         initializeLocalStorageSession();
+        listenToPaperUpdates();
+        listenToHandUpdates();
         analytics.logEvent('view_item', {
           items: [
             {
@@ -649,7 +643,6 @@
           const newLocalStorageSession = generateAlphaString(12);
           console.log('New local storage session:', newLocalStorageSession);
           localStorage.setItem(LOCAL_STORAGE_SESSION_KEY, newLocalStorageSession);
-
         } else {
           console.log('Old local storage session:', oldLocalStorageSession);
         }
@@ -671,7 +664,7 @@
             } else {
               console.log('getStateFromLocalStorage() no existing state found');
             }
-            updateHandUI();
+            updateHandUI(state);
           });
       }
 
@@ -723,6 +716,26 @@
           }
           updatePaperCount(paperCount);
         });
+      }
+
+      var handUnsubscribe = undefined;
+      function listenToHandUpdates() {
+        const roomId = state.roomId;
+        const localStorageSession = state.localStorageSession;
+        if (handUnsubscribe) {
+          // Unsubscribe from previous updates.
+          handUnsubscribe();
+        }
+        handUnsubscribe = db.collection('rooms').doc(roomId).collection('localStorageState').doc(localStorageSession)
+          .onSnapshot(function (doc) {
+            const state = doc.data();
+            if (state) {
+              updateHandUI(state);
+              Object.assign(state, state);
+            } else {
+              console.log('No data in hand');
+            }
+          });
       }
 
       function updatePaperCount(paperCount) {
