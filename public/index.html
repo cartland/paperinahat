@@ -620,7 +620,7 @@
       function displayRoom(roomId) {
         roomId = roomId.toUpperCase();
         state.roomId = roomId;
-        document.title = 'Papers in a Hat - ' + roomId;
+        document.title = 'Paper in a Hat - ' + roomId;
         document.getElementById('room-content').style.display = 'block';
         document.getElementById('room-id').innerHTML = roomId;
         createRoomIfRoomDoesNotExist(roomId);
